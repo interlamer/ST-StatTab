@@ -1,0 +1,104 @@
+/* Stat Tab popup styles. Copyright (C) 2026 Stat Tab contributors. AGPL-3.0-or-later. */
+:root {
+  --bg: #12161b;
+  --text: #e8ebef;
+  --muted: #8f9aa8;
+  --line: #2b333d;
+  --field: #1a2028;
+  --accent: #6cc4b0;
+  --up: #6cc4b0;
+  --down: #e6a05c;
+  --warn: #e6a05c;
+  --danger: #e07a7a;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f4f6f8; --text: #1c222b; --muted: #5d6978; --line: #d3dae2; --field: #ffffff;
+    --accent: #1d7d6c; --up: #1d7d6c; --down: #b4601a; --warn: #b4601a; --danger: #b43c3c;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 var(--sans); }
+body { min-height: 100vh; }
+#app { max-width: 112rem; margin: 0 auto; padding: 1.5rem clamp(1rem, 3vw, 3rem) 4rem; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button, select, input, textarea { font: inherit; color: inherit; }
+
+/* header */
+.bar { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: flex-end; justify-content: space-between;
+  padding-bottom: 1rem; border-bottom: 1px solid var(--line); }
+.bar h1 { margin: 0; font: 600 1.9rem/1.15 var(--serif); letter-spacing: 0.005em; }
+.sub { margin: 0.25rem 0 0; color: var(--muted); font-size: 0.9rem; display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; }
+.sub .err { color: var(--danger); }
+.sub .warn { color: var(--warn); }
+.sub .ok { color: var(--accent); }
+[hidden] { display: none !important; }
+.actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.btn, select.btn { background: var(--field); border: 1px solid var(--line); border-radius: 6px; padding: 0.4rem 0.8rem; cursor: pointer; }
+.btn:hover:not(:disabled) { border-color: var(--muted); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #0d1612; font-weight: 600; }
+.btn.danger { color: var(--danger); }
+.btn.quiet { background: transparent; border-color: transparent; color: var(--muted); }
+.btn.quiet:hover:not(:disabled) { color: var(--text); border-color: var(--line); }
+
+.offline { margin: 1rem 0 0; padding: 0.6rem 0.9rem; border: 1px solid var(--warn); border-radius: 6px; color: var(--warn); }
+
+/* dashboard: entities flow in columns so a wide monitor gets used */
+.ledger { column-width: 22rem; column-gap: 3.5rem; margin-top: 1.75rem; }
+.entity { break-inside: avoid; margin: 0 0 2.25rem; }
+.entity h2 { margin: 0; font: 600 1.45rem/1.2 var(--serif); padding-bottom: 0.35rem; border-bottom: 1px solid var(--line); }
+.entity .about { margin: 0.35rem 0 0; color: var(--muted); font-size: 0.85rem; }
+.stat { padding: 0.7rem 0 0.2rem; }
+.stat .row { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.stat .label { color: var(--muted); font-size: 0.9rem; }
+.stat .val { font-variant-numeric: tabular-nums; font-size: 1.25rem; font-weight: 600; background: none; border: 0; padding: 0 0.15rem;
+  cursor: text; text-align: right; border-radius: 4px; }
+.stat .val:hover { background: var(--field); }
+.stat .delta { font-size: 0.8rem; font-variant-numeric: tabular-nums; margin-left: 0.5rem; font-weight: 500; }
+.delta.up { color: var(--up); }
+.delta.down { color: var(--down); }
+.stat .max { color: var(--muted); font-size: 0.85rem; font-weight: 400; }
+.track { height: 6px; background: var(--line); border-radius: 3px; margin-top: 0.4rem; overflow: hidden; }
+.fill { height: 100%; background: var(--accent); border-radius: 3px; }
+@media (prefers-reduced-motion: no-preference) { .fill { transition: width 0.5s ease; } }
+.stat .text { margin: 0.25rem 0 0; text-align: left; font-size: 1rem; font-weight: 400; width: 100%; line-height: 1.4; white-space: pre-wrap; }
+.stat input.inline, .stat textarea.inline { width: 100%; background: var(--field); border: 1px solid var(--accent); border-radius: 4px; padding: 0.3rem 0.45rem; }
+.stat textarea.inline { resize: vertical; min-height: 4.5rem; }
+
+/* empty states */
+.empty { max-width: 34rem; margin: 5rem auto; text-align: center; }
+.empty h2 { font: 600 1.6rem/1.2 var(--serif); margin: 0 0 0.6rem; }
+.empty p { color: var(--muted); margin: 0 0 1.25rem; }
+.empty .actions { justify-content: center; }
+
+/* schema editor */
+.editor { max-width: 56rem; margin: 1.5rem 0 0; }
+.field { display: grid; gap: 0.25rem; margin: 0 0 0.9rem; }
+.field > span { color: var(--muted); font-size: 0.85rem; }
+.field input, .field select, .field textarea { background: var(--field); border: 1px solid var(--line); border-radius: 6px; padding: 0.4rem 0.6rem; width: 100%; }
+.editor .name-input { font: 600 1.4rem var(--serif); }
+.ent { border-top: 1px solid var(--line); padding: 1.1rem 0 0.4rem; margin-top: 1.1rem; }
+.ent-head { display: flex; gap: 0.5rem; align-items: flex-end; }
+.ent-head .field { flex: 1; margin: 0; }
+.var { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); gap: 0.6rem; padding: 0.8rem 0.9rem; margin: 0.7rem 0;
+  border-left: 3px solid var(--line); background: color-mix(in srgb, var(--field) 55%, transparent); border-radius: 0 6px 6px 0; }
+.var .field { margin: 0; }
+.var .wide { grid-column: 1 / -1; }
+.var .tools { grid-column: 1 / -1; display: flex; gap: 0.35rem; justify-content: flex-end; }
+.hint { color: var(--muted); font-size: 0.85rem; margin: 0.2rem 0 0.8rem; }
+.problems { color: var(--danger); margin: 0.5rem 0; padding-left: 1.2rem; }
+.footer { display: flex; gap: 0.6rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--line); align-items: center; }
+.footer .spacer { flex: 1; }
+
+.field.check { display: flex; align-items: center; gap: 0.55rem; }
+.field.check input { width: auto; }
+.field.check > span { color: var(--text); font-size: 0.9rem; }
+
+.inject { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--muted); }
+.inject summary { cursor: pointer; }
+.inject pre { white-space: pre-wrap; margin: 0.8rem 0 0.4rem; padding: 0.8rem 1rem; background: var(--field); border: 1px solid var(--line);
+  border-radius: 6px; color: var(--text); font: 0.85rem/1.55 ui-monospace, "SF Mono", Menlo, Consolas, monospace; max-width: 60rem; }
+.inject .err { color: var(--danger); }
