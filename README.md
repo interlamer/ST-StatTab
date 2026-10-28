@@ -26,11 +26,30 @@ Any of these opens it (they are independent, so one still works if a custom UI h
 
 ## Use
 
-1. In the tab, click **New schema**, add entities and stats, and save. The schema is bound to the current chat. Or **Import** one.
+1. In the tab, click **Try the example schema** to see how it works, or **New schema** to build your own (add entities and stats, then save). The schema is bound to the current chat. You can also **Import** one.
 2. Pick the connection profile in Extensions > Stat Tab (default: whichever profile is selected). Optionally choose a schema for new chats.
 3. Chat. After each character message the tracker asks the model what changed. **Update now** reruns it on the latest message. The first greeting message is skipped; use **Update now** if you want it analysed.
 
 Tips: write what a stat means in its description, because the model reads it. Put story-specific guidance ("slow burn, change things by small amounts") in the schema's instructions field rather than in stat descriptions. Use a non-reasoning profile for the tracker, or raise *Max reply tokens* and *Give up after*.
+
+## Example schema
+
+The first time it runs with no schemas, Stat Tab adds **Example: Modern life** to your schema list (it is never attached to a chat on its own). A copy is also in `examples/modern-life.stattab.json` if you delete it and want it back: use **Import**. Open it with **Edit schema** to see how each option is set up.
+
+| Entity and stat | What it shows |
+| --- | --- |
+| `{{char}}`: Trust (0 to 100) | A number with a bar |
+| `{{char}}`: Energy | A percentage |
+| `{{char}}`: Mood | Short text with a length limit |
+| `{{char}}`: Opinion of `{{user}}` | Text that **starts unset**, and `{{user}}` in a stat name |
+| `{{user}}`: Cash | Money stored in cents (shown as $1,500.00) |
+| `{{user}}`: Stress (0 to 10) | A bar with a different range |
+| `{{char}} and {{user}}`: Status, Times met | Text, and a plain number with no bar or maximum |
+| Story: Day, Time of day | A plain counter, and a text label |
+| Story: Location | Another stat that starts unset |
+| Story: Plot notes | A **private** stat: tracked and shown to you, never sent to the main model |
+
+The schema's own instructions ("change stats gradually...") show where story-specific guidance goes, and the descriptions show how to tell the model when a stat should move.
 
 ## Prompt control
 

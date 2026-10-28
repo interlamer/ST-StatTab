@@ -107,7 +107,78 @@ export function normalizePreset(raw) {
 
 /** Entities with macros in their names resolved ({{user}}, {{char}}). */
 export function labelled(preset, names) {
-    return (preset?.entities ?? []).map((e) => ({ ...e, label: resolveMacros(e.name, names).trim() }));
+    return (preset?.entities ?? []).map((e) => ({
+        ...e,
+        label: resolveMacros(e.name, names).trim(),
+        vars: e.vars.map((v) => ({ ...v, label: resolveMacros(v.name, names).trim() })),
+    }));
+}
+
+/* ---------- example schema ---------- */
+
+export const EXAMPLE_SCHEMA_ID = 'p_example_modern_life';
+
+/**
+ * A starter schema for modern-day stories. It is also a tour of the editor: every stat type and display
+ * option appears at least once (bars with different ranges, percentage, money in cents, plain numbers,
+ * short text, text that starts unset, and a stat that stays private from the main model).
+ */
+export function makeExampleSchema() {
+    const num = (id, name, description, extra = {}) => ({ id, name, description, type: 'number', ...extra });
+    const txt = (id, name, description, extra = {}) => ({ id, name, description, type: 'text', ...extra });
+    return normalizePreset({
+        id: EXAMPLE_SCHEMA_ID,
+        name: 'Example: Modern life',
+        instructions: 'Change stats gradually: most messages should move a stat by only 1 to 5 points, and many should change nothing. '
+            + 'Reserve large swings for major events such as a betrayal, a confession or a windfall. '
+            + 'Only update the stats that the latest message actually affects, and keep text values short.',
+        entities: [
+            {
+                id: 'e_char', name: '{{char}}', description: 'How {{char}} is doing right now.',
+                vars: [
+                    num('v_trust', 'Trust', '{{char}}\'s trust in {{user}}. Rises slowly through honesty and reliability, and drops sharply after lies or betrayals.',
+                        { min: 0, max: 100, initial: 40, format: 'bar' }),
+                    num('v_energy', 'Energy', '{{char}}\'s physical and mental energy. Drains with stress, long days and skipped meals; recovers with sleep, food and downtime.',
+                        { initial: 80, format: 'percent' }),
+                    txt('v_mood', 'Mood', 'A few words for {{char}}\'s current emotional state, such as calm, anxious, hopeful or irritated.',
+                        { initial: 'calm', maxLength: 40 }),
+                    txt('v_opinion', 'Opinion of {{user}}', 'One sentence on what {{char}} currently thinks of {{user}}. Update it when something changes their view.',
+                        { maxLength: 120, startsUnset: true }),
+                ],
+            },
+            {
+                id: 'e_user', name: '{{user}}', description: 'How {{user}} is doing right now.',
+                vars: [
+                    num('v_cash', 'Cash', '{{user}}\'s spendable money. Falls when {{user}} pays for things and rises when they are paid. A coffee costs about 450.',
+                        { min: 0, initial: 150000, format: 'money', symbol: '$' }),
+                    num('v_stress', 'Stress', '{{user}}\'s stress, from 0 (completely calm) to 10 (overwhelmed). Rises with deadlines, conflict and lack of sleep; falls with rest, support and good news.',
+                        { min: 0, max: 10, initial: 3, format: 'bar' }),
+                ],
+            },
+            {
+                id: 'e_rel', name: '{{char}} and {{user}}', description: 'Where things stand between them.',
+                vars: [
+                    txt('v_status', 'Status', 'The relationship in a word or two, such as Strangers, Acquaintances, Friends, Dating or Estranged.',
+                        { initial: 'Strangers', maxLength: 30 }),
+                    num('v_met', 'Times met', 'How many times they have spent time together. Add one for each new meeting, not for each message.',
+                        { min: 0, initial: 0, format: 'plain' }),
+                ],
+            },
+            {
+                id: 'e_story', name: 'Story', description: 'The setting and the passage of time.',
+                vars: [
+                    num('v_day', 'Day', 'Which day of the story it is. Add one only when the story moves on to a new day.',
+                        { min: 1, initial: 1, format: 'plain' }),
+                    txt('v_time', 'Time of day', 'Morning, Afternoon, Evening or Night.',
+                        { initial: 'Morning', maxLength: 20 }),
+                    txt('v_place', 'Location', 'Where the scene is taking place, in a few words.',
+                        { maxLength: 60, startsUnset: true }),
+                    txt('v_notes', 'Plot notes', 'Short notes on open plot threads or things to follow up on, written for the player. One or two sentences.',
+                        { maxLength: 200, hideFromModel: true }),
+                ],
+            },
+        ],
+    });
 }
 
 /* ---------- values ---------- */
@@ -232,14 +303,14 @@ function describeVar(v, current, names) {
         : v.type === 'text' ? JSON.stringify(current) : String(current);
     if (v.type === 'text') {
         const lim = v.maxLength ? ` (max ${v.maxLength} characters)` : '';
-        return `- ${v.name}: text${lim}.${desc} Current value: ${now}`;
+        return `- ${v.label ?? v.name}: text${lim}.${desc} Current value: ${now}`;
     }
     const range = v.min !== null && v.max !== null ? `from ${v.min} to ${v.max}`
         : v.min !== null ? `at least ${v.min}` : v.max !== null ? `at most ${v.max}` : 'no fixed range';
     const unit = v.format === 'money'
         ? 'integer amount in cents (1/100 of the main currency unit)'
         : v.format === 'percent' ? 'integer percentage (no % sign)' : 'integer';
-    return `- ${v.name}: ${unit}, ${range}.${desc} Current value: ${now}`;
+    return `- ${v.label ?? v.name}: ${unit}, ${range}.${desc} Current value: ${now}`;
 }
 
 export const DEFAULT_SYSTEM_PROMPT = 'You are a state-tracking engine for an ongoing roleplay. You never write story text. '
@@ -274,7 +345,7 @@ export function buildPrompt({ preset, values, names, messages, card = '', person
         return [head, ...e.vars.map((v) => describeVar(v, values?.[e.id]?.[v.id], names))].join('\n');
     }).join('\n\n');
 
-    const unset = ents.flatMap((e) => e.vars.filter((v) => (values?.[e.id]?.[v.id] ?? null) === null).map((v) => `${e.label}: ${v.name}`));
+    const unset = ents.flatMap((e) => e.vars.filter((v) => (values?.[e.id]?.[v.id] ?? null) === null).map((v) => `${e.label}: ${v.label}`));
     const convo = messages.map((m) => `${m.name}: ${clip(str(m.text), maxChars)}`).join('\n\n');
 
     const parts = ['## Tracked stats\n' + stats];
@@ -314,7 +385,7 @@ export function renderStatsText({ preset, values, names }) {
             if (v.type === 'text') shown = String(val).replace(/\s+/g, ' ').trim();
             else if (v.format === 'bar' && v.max !== null) shown = `${val}/${v.max}`;
             else shown = formatValue(v, val);
-            if (shown) lines.push(`- ${v.name}: ${shown}`);
+            if (shown) lines.push(`- ${v.label}: ${shown}`);
         }
         if (lines.length) blocks.push(`${e.label}:\n${lines.join('\n')}`);
     }
@@ -385,12 +456,12 @@ export function parseUpdate(text, preset, names) {
         const ent = byLabel.get(norm(ek));
         if (!ent) { warnings.push(`Unknown entity "${ek}" was ignored.`); continue; }
         if (!ev || typeof ev !== 'object' || Array.isArray(ev)) { warnings.push(`Entry for "${ek}" was not an object.`); continue; }
-        const byVar = new Map(ent.vars.map((v) => [norm(v.name), v]));
+        const byVar = new Map(ent.vars.flatMap((v) => [[norm(v.name), v], [norm(v.label), v]]));
         for (const [vk, vv] of Object.entries(ev)) {
             const def = byVar.get(norm(vk));
             if (!def) { warnings.push(`Unknown stat "${vk}" on "${ent.label}" was ignored.`); continue; }
             const c = coerceValue(def, vv);
-            if (c === null) { warnings.push(`Value for "${ent.label}: ${def.name}" could not be read.`); continue; }
+            if (c === null) { warnings.push(`Value for "${ent.label}: ${def.label}" could not be read.`); continue; }
             (changes[ent.id] ??= {})[def.id] = c;
         }
     }

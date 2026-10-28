@@ -6,7 +6,7 @@
     "js": "index.js",
     "css": "",
     "author": "Stat Tab contributors",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "homePage": "https://github.com/interlamer/ST-StatTab",
     "license": "AGPL-3.0-or-later",
     "description": "Track user-defined stats per character in a separate browser tab."

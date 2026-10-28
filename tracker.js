@@ -4,7 +4,7 @@
  * Copyright (C) 2026 Stat Tab contributors
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { formatValue, makePreset, makeEntity, makeVar, resolveMacros, exportSchemaFile, parseSchemaFile } from './core.js';
+import { formatValue, makePreset, makeEntity, makeVar, resolveMacros, exportSchemaFile, parseSchemaFile, EXAMPLE_SCHEMA_ID } from './core.js';
 
 const chan = new BroadcastChannel('stat-tab-v1');
 const app = document.getElementById('app');
@@ -198,8 +198,12 @@ function renderDashboard() {
     if (!d.enabled) { app.append(empty('Stat Tab is turned off', 'Turn it on in the SillyTavern Extensions panel.')); return; }
     if (!d.hasChat) { app.append(empty('Open a chat', 'Stats appear here once a chat is open in SillyTavern.')); return; }
     if (!preset) {
-        app.append(empty('This chat has no schema', 'Pick a schema from the list above, or build one for the stats you want to track.',
-            h('button', { class: 'btn primary', onclick: () => openEditor(true) }, 'New schema')));
+        const hasExample = d.presets.some((p) => p.id === EXAMPLE_SCHEMA_ID);
+        app.append(empty('This chat has no schema', hasExample
+            ? 'Try the example to see how stats work, pick one from the list above, or build your own.'
+            : 'Pick a schema from the list above, or build one for the stats you want to track.',
+        hasExample ? h('button', { class: 'btn primary', onclick: () => send({ t: 'bind', presetId: EXAMPLE_SCHEMA_ID }) }, 'Try the example schema') : null,
+        h('button', { class: hasExample ? 'btn' : 'btn primary', onclick: () => openEditor(true) }, 'New schema')));
         return;
     }
     if (!preset.entities.some((e) => e.vars.length)) {
@@ -239,7 +243,7 @@ function statRow(ent, def) {
 
     if (def.type === 'text') {
         return h('div', { class: 'stat' },
-            h('div', { class: 'row' }, h('span', { class: 'label', title: def.description }, def.name)),
+            h('div', { class: 'row' }, h('span', { class: 'label', title: def.description }, resolveMacros(def.name, S.data.names))),
             h('button', { class: 'val text', onclick: (ev) => open(ev.currentTarget), title: 'Click to edit' }, val || '\u2014'));
     }
 
@@ -254,12 +258,12 @@ function statRow(ent, def) {
     const pct = bar && typeof val === 'number' ? Math.max(0, Math.min(100, ((val - def.min) / (def.max - def.min)) * 100)) : 0;
     return h('div', { class: 'stat' },
         h('div', { class: 'row' },
-            h('span', { class: 'label', title: def.description }, def.name),
+            h('span', { class: 'label', title: def.description }, resolveMacros(def.name, S.data.names)),
             h('span', {},
                 h('button', { class: 'val', onclick: (ev) => open(ev.currentTarget), title: 'Click to edit' }, formatValue(def, val)),
                 bar && typeof val === 'number' ? h('span', { class: 'max' }, ` / ${formatValue(def, def.max)}`) : null,
                 delta)),
-        bar ? h('div', { class: 'track', role: 'progressbar', 'aria-label': def.name, 'aria-valuemin': def.min, 'aria-valuemax': def.max, 'aria-valuenow': typeof val === 'number' ? val : undefined },
+        bar ? h('div', { class: 'track', role: 'progressbar', 'aria-label': resolveMacros(def.name, S.data.names), 'aria-valuemin': def.min, 'aria-valuemax': def.max, 'aria-valuenow': typeof val === 'number' ? val : undefined },
             h('div', { class: 'fill', style: `width:${pct}%` })) : null);
 }
 

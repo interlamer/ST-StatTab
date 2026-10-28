@@ -1,0 +1,209 @@
+{
+  "format": "stat-tab-schema",
+  "version": 1,
+  "exportedAt": "2026-10-27T22:31:47.441Z",
+  "schemas": [
+    {
+      "name": "Example: Modern life",
+      "instructions": "Change stats gradually: most messages should move a stat by only 1 to 5 points, and many should change nothing. Reserve large swings for major events such as a betrayal, a confession or a windfall. Only update the stats that the latest message actually affects, and keep text values short.",
+      "entities": [
+        {
+          "id": "e_char",
+          "name": "{{char}}",
+          "description": "How {{char}} is doing right now.",
+          "vars": [
+            {
+              "id": "v_trust",
+              "name": "Trust",
+              "type": "number",
+              "description": "{{char}}'s trust in {{user}}. Rises slowly through honesty and reliability, and drops sharply after lies or betrayals.",
+              "startsUnset": false,
+              "hideFromModel": false,
+              "min": 0,
+              "max": 100,
+              "format": "bar",
+              "symbol": "$",
+              "maxLength": null,
+              "initial": 40
+            },
+            {
+              "id": "v_energy",
+              "name": "Energy",
+              "type": "number",
+              "description": "{{char}}'s physical and mental energy. Drains with stress, long days and skipped meals; recovers with sleep, food and downtime.",
+              "startsUnset": false,
+              "hideFromModel": false,
+              "min": 0,
+              "max": 100,
+              "format": "percent",
+              "symbol": "$",
+              "maxLength": null,
+              "initial": 80
+            },
+            {
+              "id": "v_mood",
+              "name": "Mood",
+              "type": "text",
+              "description": "A few words for {{char}}'s current emotional state, such as calm, anxious, hopeful or irritated.",
+              "startsUnset": false,
+              "hideFromModel": false,
+              "max": null,
+              "min": null,
+              "format": "plain",
+              "symbol": "$",
+              "maxLength": 40,
+              "initial": "calm"
+            },
+            {
+              "id": "v_opinion",
+              "name": "Opinion of {{user}}",
+              "type": "text",
+              "description": "One sentence on what {{char}} currently thinks of {{user}}. Update it when something changes their view.",
+              "startsUnset": true,
+              "hideFromModel": false,
+              "max": null,
+              "min": null,
+              "format": "plain",
+              "symbol": "$",
+              "maxLength": 120,
+              "initial": ""
+            }
+          ]
+        },
+        {
+          "id": "e_user",
+          "name": "{{user}}",
+          "description": "How {{user}} is doing right now.",
+          "vars": [
+            {
+              "id": "v_cash",
+              "name": "Cash",
+              "type": "number",
+              "description": "{{user}}'s spendable money. Falls when {{user}} pays for things and rises when they are paid. A coffee costs about 450.",
+              "startsUnset": false,
+              "hideFromModel": false,
+              "min": 0,
+              "max": null,
+              "format": "money",
+              "symbol": "$",
+              "maxLength": null,
+              "initial": 150000
+            },
+            {
+              "id": "v_stress",
+              "name": "Stress",
+              "type": "number",
+              "description": "{{user}}'s stress, from 0 (completely calm) to 10 (overwhelmed). Rises with deadlines, conflict and lack of sleep; falls with rest, support and good news.",
+              "startsUnset": false,
+              "hideFromModel": false,
+              "min": 0,
+              "max": 10,
+              "format": "bar",
+              "symbol": "$",
+              "maxLength": null,
+              "initial": 3
+            }
+          ]
+        },
+        {
+          "id": "e_rel",
+          "name": "{{char}} and {{user}}",
+          "description": "Where things stand between them.",
+          "vars": [
+            {
+              "id": "v_status",
+              "name": "Status",
+              "type": "text",
+              "description": "The relationship in a word or two, such as Strangers, Acquaintances, Friends, Dating or Estranged.",
+              "startsUnset": false,
+              "hideFromModel": false,
+              "max": null,
+              "min": null,
+              "format": "plain",
+              "symbol": "$",
+              "maxLength": 30,
+              "initial": "Strangers"
+            },
+            {
+              "id": "v_met",
+              "name": "Times met",
+              "type": "number",
+              "description": "How many times they have spent time together. Add one for each new meeting, not for each message.",
+              "startsUnset": false,
+              "hideFromModel": false,
+              "min": 0,
+              "max": null,
+              "format": "plain",
+              "symbol": "$",
+              "maxLength": null,
+              "initial": 0
+            }
+          ]
+        },
+        {
+          "id": "e_story",
+          "name": "Story",
+          "description": "The setting and the passage of time.",
+          "vars": [
+            {
+              "id": "v_day",
+              "name": "Day",
+              "type": "number",
+              "description": "Which day of the story it is. Add one only when the story moves on to a new day.",
+              "startsUnset": false,
+              "hideFromModel": false,
+              "min": 1,
+              "max": null,
+              "format": "plain",
+              "symbol": "$",
+              "maxLength": null,
+              "initial": 1
+            },
+            {
+              "id": "v_time",
+              "name": "Time of day",
+              "type": "text",
+              "description": "Morning, Afternoon, Evening or Night.",
+              "startsUnset": false,
+              "hideFromModel": false,
+              "max": null,
+              "min": null,
+              "format": "plain",
+              "symbol": "$",
+              "maxLength": 20,
+              "initial": "Morning"
+            },
+            {
+              "id": "v_place",
+              "name": "Location",
+              "type": "text",
+              "description": "Where the scene is taking place, in a few words.",
+              "startsUnset": true,
+              "hideFromModel": false,
+              "max": null,
+              "min": null,
+              "format": "plain",
+              "symbol": "$",
+              "maxLength": 60,
+              "initial": ""
+            },
+            {
+              "id": "v_notes",
+              "name": "Plot notes",
+              "type": "text",
+              "description": "Short notes on open plot threads or things to follow up on, written for the player. One or two sentences.",
+              "startsUnset": false,
+              "hideFromModel": true,
+              "max": null,
+              "min": null,
+              "format": "plain",
+              "symbol": "$",
+              "maxLength": 200,
+              "initial": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

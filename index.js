@@ -9,7 +9,7 @@
  */
 import {
     KEY, normalizePreset, resolveState, buildPrompt, parseUpdate, applyChanges,
-    coerceValue, writeMessageState, labelled, defaultValue, DEFAULT_SYSTEM_PROMPT, DEFAULT_RULES,
+    coerceValue, writeMessageState, labelled, defaultValue, DEFAULT_SYSTEM_PROMPT, DEFAULT_RULES, makeExampleSchema,
     DEFAULT_INJECT_TEMPLATE, renderStatsText, applyInjectionTemplate,
 } from './core.js';
 
@@ -33,6 +33,7 @@ const DEFAULTS = {
     injectRole: 'system',   // 'system' | 'user' | 'assistant'
     injectTemplate: '',     // '' = built-in default
     debug: false,
+    exampleSeeded: false,   // the starter schema is added once, and only to an empty schema list
     presets: [],
 };
 
@@ -437,10 +438,20 @@ export function openTracker() {
 
 /* ---------- ST UI: menu entry, settings panel, slash command ---------- */
 
+/** First run only: give people with no schemas a starter one to look at. It is never attached to a chat on its own. */
+export function seedExample() {
+    const s = getSettings();
+    if (s.exampleSeeded) return;
+    s.exampleSeeded = true;
+    if (!s.presets.length) s.presets.push(makeExampleSchema());
+    saveSettings();
+}
+
 let booted = false;
 function boot() {
     if (booted || typeof document === 'undefined') return;
     booted = true;
+    seedExample();
     addMenuEntry();
     ensureTopBarButton(getSettings().topBarButton);
     addSettingsPanel();
@@ -641,4 +652,4 @@ function refreshSettingsUi() {
 registerEvents();
 if (typeof document !== 'undefined' && document.getElementById('extensionsMenu')) boot();
 
-export const _internal = { labelled, getSettings, boot, buildInjection };
+export const _internal = { labelled, getSettings, boot, buildInjection, seedExample };
